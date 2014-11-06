@@ -30,8 +30,10 @@
 
 (defn chord-track [base-scale len chord-len]
   (let [c (chords base-scale len)]
-    (mapcat (fn [chord offset] (chord-notes chord 127 offset chord-len))
-            c (range 0 (* len chord-len) chord-len))))
+    {:type :chord
+     :notes (mapcat
+             (fn [chord offset] (chord-notes chord 127 offset chord-len))
+             c (range 0 (* len chord-len) chord-len))}))
 
 (defn play [seed]
   (with-seed seed

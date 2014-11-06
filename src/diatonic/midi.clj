@@ -22,19 +22,28 @@
     (.setMessage message 0x51 data (alength data))
     (midi-event message 0)))
 
+(defn- channel-event [channel instrument]
+  (let [channel-msg (short-message (ShortMessage/PROGRAM_CHANGE)
+                                   channel instrument 0)]
+    (midi-event channel-msg 0)))
+
 (defn- note-on-event [pitch velocity tick]
-  (let [on-msg (short-message (ShortMessage/NOTE_ON), 0, pitch, velocity)]
+  (let [on-msg (short-message (ShortMessage/NOTE_ON) 0 pitch velocity)]
     (midi-event on-msg tick)))
 
 (defn- note-off-event [pitch tick]
-  (let [off-msg (short-message (ShortMessage/NOTE_OFF), 0, pitch, 64)]
+  (let [off-msg (short-message (ShortMessage/NOTE_OFF) 0 pitch 64)]
     (midi-event off-msg tick)))
 
 (defn midi-sequence [bpm tracks]
   (let [sequence (Sequence. (Sequence/PPQ) 8)]
-    (doseq [notes tracks]
-      (let [track (.createTrack sequence)]
+    (doseq [track-data tracks]
+      (let [track (.createTrack sequence)
+            track-type (:type track-data)
+            notes (:notes track-data)]
         (doseq [note notes]
+          (cond (= track-type :chord) (.add track (channel-event 0 0))
+                (= track-type :drums) (.add track (channel-event 0 36)))
           (doto track
             (.add (note-on-event (:pitch note)
                                  (:velocity note)
