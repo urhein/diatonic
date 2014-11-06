@@ -43,13 +43,17 @@
     sequence))
 
 (defn play-sequence [sequence]
-  (locking sequencer
-    (with-open [s sequencer]
-      (doto sequencer
-        (.setSequence sequence)
-        (.open)
-        (.start))
-      (loop []
-        (when (.isRunning sequencer)
-          (Thread/sleep 100)
-          (recur))))))
+  (.start
+   (Thread.
+    (fn []
+      (locking sequencer
+        (with-open [s sequencer]
+          (doto sequencer
+            (.setSequence sequence)
+            (.open)
+            (.start))
+          (loop []
+            (when (.isRunning sequencer)
+              (Thread/sleep 100)
+              (recur)))
+          (Thread/sleep 200)))))))
