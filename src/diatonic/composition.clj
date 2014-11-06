@@ -35,7 +35,9 @@
 
 (defn play [seed]
   (with-seed seed
-    (m/play-sequence
-     (m/midi-sequence 128 [(chord-track (s/aeolic-scale 60) 4 32)]))))
+    (let [base-scale (if (g/boolean) s/ionic-scale s/aeolic-scale)]
+      (m/play-sequence
+       (m/midi-sequence 128 [(chord-track (base-scale 60) 4 32)]))))
+  seed)
 
-; (play 12345)
+; (play (g/long))
