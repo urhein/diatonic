@@ -33,6 +33,9 @@
     (mapcat (fn [chord offset] (chord-notes chord 127 offset chord-len))
             c (range 0 (* len chord-len) chord-len))))
 
-; (m/play-sequence
-;  (m/midi-sequence
-;   (chord-track (s/ionic-scale 60) 4 32) 128))
+(defn play [seed]
+  (with-seed seed
+    (m/play-sequence
+     (m/midi-sequence 128 [(chord-track (s/aeolic-scale 60) 4 32)]))))
+
+; (play 12345)

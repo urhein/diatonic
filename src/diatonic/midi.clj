@@ -30,16 +30,19 @@
   (let [off-msg (short-message (ShortMessage/NOTE_OFF), 0, pitch, 64)]
     (midi-event off-msg tick)))
 
-(defn midi-sequence [notes bpm]
-  (let [sequence (Sequence. (Sequence/PPQ) 8)
-        track (.createTrack sequence)]
-    (loop [remaining notes]
-      (when-let [note (first remaining)]
-        (doto track
-          (.add (note-on-event (:pitch note) (:velocity note) (:offset note)))
-          (.add (note-off-event (:pitch note) (+ (:offset note) (:length note)))))
-        (recur (rest remaining))))
-    (.add track (tempo-event bpm))
+(defn midi-sequence [bpm tracks]
+  (let [sequence (Sequence. (Sequence/PPQ) 8)]
+    (doseq [notes tracks]
+      (let [track (.createTrack sequence)]
+        (doseq [note notes]
+          (doto track
+            (.add (note-on-event (:pitch note)
+                                 (:velocity note)
+                                 (:offset note)))
+            (.add (note-off-event (:pitch note)
+                                  (+ (:offset note)
+                                     (:length note))))))))
+    (.add (first (.getTracks sequence)) (tempo-event bpm))
     sequence))
 
 (defn play-sequence [sequence]
