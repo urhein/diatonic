@@ -1,6 +1,7 @@
 (ns diatonic.composition
   (:require [clojure.data.generators :as g]
             [diatonic.drums :as d]
+            [diatonic.notes :as n]
             [diatonic.scales :as s]
             [diatonic.midi :as m]))
 
@@ -21,13 +22,20 @@
                      (s/derived-scale base-scale (:step scale-step))))]
     (cons base-scale (take (dec len) (repeatedly chord-fn)))))
 
-(defn chord-notes [scale velocity offset length]
+(defn- inversion [scale]
   (let [diatonics (s/diatonic-steps scale)
         base (first diatonics)
         third (nth diatonics 2)
-        fifth (nth diatonics 4)]
-    (map #(assoc % :velocity velocity :offset offset :length length)
-         [base third fifth])))
+        fifth (nth diatonics 4)
+        type (g/weighted {:base 50 :inv-1 10 :inv-2 10})]
+    (condp = type
+      :base [base third fifth]
+      :inv-1 [base third (n/transpose fifth -12)]
+      :inv-2 [(n/transpose base 12) third fifth])))
+
+(defn chord-notes [scale velocity offset length]
+  (map #(assoc % :velocity velocity :offset offset :length length)
+       (inversion scale)))
 
 (defn chord-track [base-scale len chord-len]
   (let [c (chords base-scale len)]
