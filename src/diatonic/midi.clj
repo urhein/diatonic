@@ -27,12 +27,12 @@
                                    channel instrument 0)]
     (midi-event channel-msg 0)))
 
-(defn- note-on-event [pitch velocity tick]
-  (let [on-msg (short-message (ShortMessage/NOTE_ON) 0 pitch velocity)]
+(defn- note-on-event [channel pitch velocity tick]
+  (let [on-msg (short-message (ShortMessage/NOTE_ON) channel pitch velocity)]
     (midi-event on-msg tick)))
 
-(defn- note-off-event [pitch tick]
-  (let [off-msg (short-message (ShortMessage/NOTE_OFF) 0 pitch 64)]
+(defn- note-off-event [channel pitch tick]
+  (let [off-msg (short-message (ShortMessage/NOTE_OFF) channel pitch 64)]
     (midi-event off-msg tick)))
 
 (defn midi-sequence [bpm tracks]
@@ -40,15 +40,18 @@
     (doseq [track-data tracks]
       (let [track (.createTrack sequence)
             track-type (:type track-data)
-            notes (:notes track-data)]
+            notes (:notes track-data)
+            channel (if (= track-type :drums) 9 0)]
+        (cond (= track-type :chord) (.add track (channel-event channel 0))
+              (= track-type :drums) (.add track (channel-event channel 36)))
         (doseq [note notes]
-          (cond (= track-type :chord) (.add track (channel-event 0 0))
-                (= track-type :drums) (.add track (channel-event 0 36)))
           (doto track
-            (.add (note-on-event (:pitch note)
+            (.add (note-on-event channel
+                                 (:pitch note)
                                  (:velocity note)
                                  (:offset note)))
-            (.add (note-off-event (:pitch note)
+            (.add (note-off-event channel
+                                  (:pitch note)
                                   (+ (:offset note)
                                      (:length note))))))))
     (.add (first (.getTracks sequence)) (tempo-event bpm))

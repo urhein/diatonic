@@ -1,5 +1,6 @@
 (ns diatonic.composition
   (:require [clojure.data.generators :as g]
+            [diatonic.drums :as d]
             [diatonic.scales :as s]
             [diatonic.midi :as m]))
 
@@ -37,9 +38,12 @@
 
 (defn play [seed]
   (with-seed seed
-    (let [base-scale (if (g/boolean) s/ionic-scale s/aeolic-scale)]
+    (let [len 4
+          base-scale (if (g/boolean) s/ionic-scale s/aeolic-scale)
+          chords (chord-track (base-scale 60) len 32)
+          drums (d/drum-track len)]
       (m/play-sequence
-       (m/midi-sequence 128 [(chord-track (base-scale 60) 4 32)]))))
+       (m/midi-sequence 128 [chords drums]))))
   seed)
 
 ; (play (g/long))
