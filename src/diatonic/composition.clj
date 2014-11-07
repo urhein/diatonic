@@ -12,7 +12,7 @@
 
 
 (defn play [seed]
-  (with-seed seed
+  (with-seed (if (string? seed) (.hashCode seed) seed)
     (let [len 4
           base-scale (if (g/boolean) s/ionic-scale s/aeolic-scale)
           chords (c/chord-track (base-scale 64) len 32)
@@ -22,3 +22,4 @@
   seed)
 
 ; (play (g/long))
+; (play "foobar")
