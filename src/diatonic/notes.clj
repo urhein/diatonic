@@ -1,4 +1,4 @@
 (ns diatonic.notes)
 
-(defn transpose [note amount]
+(defn transpose [amount note]
   (update-in note [:pitch] + amount))

@@ -23,16 +23,29 @@
         type (g/weighted {:base 50 :inv-1 10 :inv-2 10})]
     (condp = type
       :base [base third fifth]
-      :inv-1 [base third (n/transpose fifth -12)]
-      :inv-2 [(n/transpose base 12) third fifth])))
+      :inv-1 [(n/transpose -12 fifth) base third]
+      :inv-2 [third fifth (n/transpose 12 base)])))
 
-(defn chord-notes [scale velocity offset length]
+(defn- place-chord-near
+  "Place chord (specified by a note vector) near to the specified
+  base pitch, by eventually transposing the notes by octaves."
+  [base-pitch chord]
+  (let [avg-pitch (int (/ (apply + (map :pitch chord)) (count chord)))
+        pitch-diff (- base-pitch avg-pitch)
+        pitch-rem (rem pitch-diff 12)
+        pitch-adjust (if (> (Math/abs pitch-rem) 6)
+                       (if (>= pitch-rem 0) -12 12) 0)
+        transpose-by (- pitch-diff pitch-rem pitch-adjust)]
+    (map (partial n/transpose transpose-by) chord)))
+
+(defn chord-notes [scale base-scale velocity offset length]
   (map #(assoc % :velocity velocity :offset offset :length length)
-       (inversion scale)))
+       (place-chord-near (s/base-pitch base-scale) (inversion scale))))
 
 (defn chord-track [base-scale len chord-len]
   (let [c (chords base-scale len)]
     {:type :chord
      :notes (mapcat
-             (fn [chord offset] (chord-notes chord 127 offset chord-len))
+             (fn [chord offset]
+               (chord-notes chord base-scale 127 offset chord-len))
              c (range 0 (* len chord-len) chord-len))}))
