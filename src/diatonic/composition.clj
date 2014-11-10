@@ -2,7 +2,8 @@
   (:require [clojure.data.generators :as g]
             [diatonic.chords :as c]
             [diatonic.drums :as d]
-            [diatonic.midi :as m]
+            [diatonic.melodies :as m]
+            [diatonic.midi :as midi]
             [diatonic.scales :as s]))
 
 (defmacro with-seed [seed & body]
@@ -32,13 +33,15 @@
           (init-base-scale)
           (c/init-chords)
           (c/init-chord-notes)
-          (d/init-drums)))))
+          (d/init-drums)
+          (m/init-melody)))))
 
 (defn play [seed]
   (let [composition (compose seed)
         chords {:type :chord :notes (:chord-notes composition)}
+        melody {:type :melody :notes (:melody-notes composition)}
         drums {:type :drums :notes (:drum-notes composition)}]
-    (m/play-sequence (m/midi-sequence 128 [chords drums]))
+    (midi/play-sequence (midi/midi-sequence 128 [chords drums]))
     composition))
 
 ; (:seed (play (g/long)))

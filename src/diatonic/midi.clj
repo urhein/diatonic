@@ -41,9 +41,11 @@
       (let [track (.createTrack sequence)
             track-type (:type track-data)
             notes (:notes track-data)
-            channel (if (= track-type :drums) 9 0)]
-        (cond (= track-type :chord) (.add track (channel-event channel 0))
-              (= track-type :drums) (.add track (channel-event channel 36)))
+            [channel instrument] (condp = track-type
+                                   :chord [0 0]
+                                   :melody [1 0]
+                                   :drums [9 36])]
+        (.add track (channel-event channel instrument))
         (doseq [note notes]
           (doto track
             (.add (note-on-event channel
