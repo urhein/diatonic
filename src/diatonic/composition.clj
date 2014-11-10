@@ -31,13 +31,15 @@
       (-> context
           (init-base-scale)
           (c/init-chords)
-          (c/init-chord-notes)))))
+          (c/init-chord-notes)
+          (d/init-drums)))))
 
 (defn play [seed]
   (let [composition (compose seed)
-        chords {:type :chord :notes (:chord-notes composition)}]
-    (m/play-sequence (m/midi-sequence 128 [chords]))
+        chords {:type :chord :notes (:chord-notes composition)}
+        drums {:type :drums :notes (:drum-notes composition)}]
+    (m/play-sequence (m/midi-sequence 128 [chords drums]))
     composition))
 
-; (play (g/long))
+; (:seed (play (g/long)))
 ; (play "foobar")

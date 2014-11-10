@@ -28,5 +28,7 @@
     (mapcat (fn [bar] (map #(update-in % [:offset] + (* bar 32)) pattern))
             (range 0 len))))
 
-(defn drum-track [len]
-  {:type :drums :notes (drum-notes len)})
+(defn init-drums [context]
+  (if-not (:drum-notes context)
+    (assoc context :drum-notes (drum-notes (:bars context)))
+    context))
