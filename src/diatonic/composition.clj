@@ -23,7 +23,7 @@
   (if (:base-scale context)
     context
     (assoc context :base-scale
-           ((if (g/boolean) s/ionic-scale s/aeolic-scale) 64))))
+           ((if (g/boolean) s/ionic-scale s/aeolic-scale) (g/uniform 59 70)))))
 
 (defn compose [seed]
   (with-seed (if (string? seed) (.hashCode seed) seed)
