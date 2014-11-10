@@ -33,16 +33,11 @@
           (c/init-chords)
           (c/init-chord-notes)))))
 
-; (compose "1234")
 (defn play [seed]
-  (with-seed (if (string? seed) (.hashCode seed) seed)
-    (let [len 4
-          base-scale (if (g/boolean) s/ionic-scale s/aeolic-scale)
-          chords (c/chord-track (base-scale 64) len 32)
-          drums (d/drum-track len)]
-      (m/play-sequence
-       (m/midi-sequence 128 [chords drums]))))
-  seed)
+  (let [composition (compose seed)
+        chords {:type :chord :notes (:chord-notes composition)}]
+    (m/play-sequence (m/midi-sequence 128 [chords]))
+    composition))
 
 ; (play (g/long))
 ; (play "foobar")
